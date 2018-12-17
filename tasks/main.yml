@@ -1,5 +1,5 @@
 - include_tasks: base.yml
-- include_tasks: roles/ansible_solr/mounts.yml
+- include_tasks: mounts.yml
   when: environment_type != 'dev'
 - include_tasks: solr.yml
 - include_tasks: islandora.yml
