@@ -1,0 +1,19 @@
+# root@ubuntu-xenial:/tmp/solr-4.10.4# cat /etc/systemd/system/solr.service
+[Unit]
+Description=Standalone solr server
+After=network.target
+
+[Service]
+Type=forking
+ExecStart={{ solr_home }}/bin/solr start -noprompt
+ExecStop={{ solr_home }}/bin/solr stop -all
+
+User={{ solr_user }}
+Group={{ solr_user }}
+
+UMask=0007
+RestartSec=10
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

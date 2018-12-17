@@ -1,0 +1,9 @@
+- name: ensure filesystem exists
+  filesystem:
+    fstype: ext4
+    dev: "{{ solr_data_device }}"
+
+- name: update fstab
+  lineinfile:
+    line: "/dev/{{ solr_data_device }}  {{ solr_data_mount_point }} ext4  0 0"
+    path: /etc/fstab

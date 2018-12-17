@@ -1,0 +1,12 @@
+java_home: /usr/lib/jvm/java-1.8.0-openjdk-amd64
+everyones_home_parent_directory: /opt
+solr_default_core: collection1
+solr_default_core_home: "{{ solr_home }}/example/solr"
+solr_home: "{{ everyones_home_parent_directory }}/solr-{{ solr_version }}"
+solr_log_config_location:
+solr_version: 4.10.4
+solr_xmx: "{{ (ansible_memtotal_mb*0.5)|int|abs }}m"
+solr_user: solr
+solr_data_mount_point: /mnt/vol-solr-data
+tomcat_xmx: "{{ (ansible_memtotal_mb*0.5)|int|abs }}m"
+environment_type: dev

@@ -1,0 +1,77 @@
+- user:
+    name: "{{ solr_user }}"
+    shell: /bin/false
+    home: "{{ solr_home }}"
+
+- stat:
+    path: "{{ everyones_home_parent_directory }}/solr-{{ solr_version }}/bin"
+  register: solr_src
+
+# - name: get source
+#   unarchive:
+#     dest: "{{ everyones_home_parent_directory }}"
+#     remote_src: yes
+#     src: "https://archive.apache.org/dist/lucene/solr/{{ solr_version }}/solr-{{ solr_version }}.tgz"
+#   when: not solr_src.stat.exists
+
+- name: get source from local cache until apache is back online....
+  unarchive:
+    src: "files/solr-{{ solr_version }}.tgz"
+    dest: "{{ everyones_home_parent_directory }}"
+    owner: "{{ solr_user }}"
+    group: "{{ solr_user }}"
+  when: not solr_src.stat.exists
+
+- name: remove default solr includes
+  file:
+    path: "{{ solr_home }}/bin/solr.in.sh"
+    state: absent
+
+- name: create solr includes dir
+  file:
+    path: /usr/local/share/solr
+    state: directory
+    owner: "{{ solr_user }}"
+    group: "{{ solr_user }}"
+
+- name: copy solr includes into place
+  template:
+    src: templates/solr.in.sh.j2
+    dest: /usr/local/share/solr/solr.in.sh
+    owner: "{{ solr_user }}"
+    group: "{{ solr_user }}"
+
+- name: Create solr-data mountpoint
+  file:
+    path: "{{ solr_data_mount_point }}"
+    state: directory
+    owner: "{{ solr_user }}"
+    group: "{{ solr_user }}"
+
+- name: create symlink for data/
+  file:
+    path: "{{ solr_default_core_home }}/collection1/data"
+    src: "{{ solr_data_mount_point }}"
+    state: link
+    owner: "{{ solr_user }}"
+    group: "{{ solr_user }}"
+
+- name: ensure solr owns what it needs
+  file:
+    path: "{{ solr_home }}"
+    recurse: yes
+    owner: "{{ solr_user }}"
+    group: "{{ solr_user }}"
+
+- name: configure systemd service
+  template:
+    src: templates/solr.service.j2
+    dest: /etc/systemd/system/solr.service
+
+- systemd:
+    daemon_reload: yes
+
+# - name: Start solr
+#   systemd:
+#     name: solr
+#     state: started

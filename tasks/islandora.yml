@@ -1,0 +1,96 @@
+- git:
+    repo: https://github.com/discoverygarden/basic-solr-config
+    version: 4.10.x
+    force: yes
+    dest: /opt/basic-solr-config
+
+- file:
+    path: /opt/basic-solr-config
+    recurse: True
+    owner: "{{ solr_user }}"
+    group: "{{ solr_user }}"
+
+- name: Update deprecated field types
+  replace:
+    path: /opt/basic-solr-config/conf/schema.xml
+    regexp: 'class="solr.({{ item }})Field"'
+    replace: 'class="solr.Trie\1Field"'
+  with_items:
+    - Int
+    - Long
+    - Float
+    - Double
+
+- name: Update deprecated field types
+  replace:
+    path: /opt/basic-solr-config/conf/schema.xml
+    regexp: 'class="solr.Sortable({{ item }})Field"'
+    replace: 'class="solr.Trie\1Field"'
+  with_items:
+    - Int
+    - Long
+    - Float
+    - Double
+
+- name: comment-out copyfield *_ss per https://groups.google.com/d/msg/islandora/rDYYxxkwZM0/zQm9gMxWDwAJ
+  replace:
+    path: /opt/basic-solr-config/conf/schema.xml
+    regexp: '(<copyField source="\*_s" dest="\*_ss"/>)'
+    replace: '<!-- \1 see https://groups.google.com/d/msg/islandora/rDYYxxkwZM0/zQm9gMxWDwAJ -->'
+
+- name: update schema.xml with date copyfield stuffs
+  blockinfile:
+    path: /opt/basic-solr-config/conf/schema.xml
+    marker: "<!-- {mark} ANSIBLE MANAGED BLOCK -->"
+    insertbefore: '</schema>'
+    block: |
+      <!--combining into custom sort field-->
+      <copyField source="mods_originInfo_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_edtf_keydate_yes_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_w3cdtf_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_w3cdtf_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_w3cdtf_keydate_yes_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_w3cdtf_keydate_yes_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_w3cdtf_keydate_yes_point_start_qualifier_approximate_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_w3cdtf_keydate_yes_point_start_qualifier__dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_w3cdtf_keydate_yes_qualifier_approximate_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_w3cdtf_keydate_yes_qualifier__dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_w3cdtf_keydate_yes_qualifier__dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_w3cdtf_keydate_yes_qualifier_inferred_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_encoding_w3cdtf_qualifier__dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_point_start_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_point_start_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_point_start_qualifier_approximate_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keydate_yes_point_start_qualifier_approximate_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_point_start_qualifier_approximate_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_point_start_qualifier__dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_point_start_qualifier__dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_point_start_qualifier_inferred_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_point_start_qualifier_inferred_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_point_start_qualifier_questionable_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_point_start_qualifier_questionable_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_qualifier_approximate_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_qualifier_approximate_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_qualifier__dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_qualifier__dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_qualifier_inferred_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_qualifier_inferred_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_qualifier_questionable_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_keyDate_yes_qualifier_questionable_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_point_start_dateIssued_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_qualifier_approximate_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_qualifier__dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+      <copyField source="mods_originInfo_qualifier_inferred_dateCreated_dt" dest="mods_originInfo_dateCreated_sort"/>
+
+- stat:
+    path: "{{ solr_default_core_home }}/collection1/conf/schema.xml"
+  register: solrconf_schema
+
+- command: "mv {{ solr_default_core_home }}/collection1/conf/schema.xml {{ solr_default_core_home }}/collection1/conf/schema.xml.orig"
+  when: solrconf_schema.stat.exists and not solrconf_schema.stat.islnk
+
+- name: Copy islandora config to solr core
+  command: "cp -r /opt/basic-solr-config/conf {{ solr_default_core_home }}/collection1/"

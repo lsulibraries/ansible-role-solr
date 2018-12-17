@@ -1,0 +1,11 @@
+- include_tasks: base.yml
+- include_tasks: roles/ansible_solr/mounts.yml
+  when: environment_type != 'dev'
+- include_tasks: solr.yml
+- include_tasks: islandora.yml
+
+- name: restart solr
+  systemd:
+    name: solr
+    state: restarted
+    enabled: yes
